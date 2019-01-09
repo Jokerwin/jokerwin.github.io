@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<!-- HTML5 Hello world by kirupa - http://www.kirupa.com/html5/getting_your_feet_wet_html5_pg1.htm -->
+<html lang="en-us">
+
+<head>
+<meta charset="utf-8">
+<title>Verificar TO Boca Juniors</title>
+<style type="text/css">
+ul
+{
+list-style-type: none;
+}
+#mainContent {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: xx-large;
+	font-weight: bold;
+	background-color: #E3F0FB;
+	border-radius: 4px;
+	padding: 10px;
+	text-align: center;
+}
+.buttonStyle {
+	border-radius: 4px;
+	border: thin solid #F0E020;
+	padding: 25px;
+	background-color: #F8F094;
+	font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+	font-size: 24px;
+	font-weight: bold;
+	color: #663300;
+}
+
+.buttonStyle:hover {
+	border: thin solid #FFCC00;
+	background-color: #FCF9D6;
+	color: #996633;
+	cursor: pointer;
+}
+.buttonStyle:active {
+	border: thin solid #99CC00;
+	background-color: #F5FFD2;
+	color: #669900;
+	cursor: pointer;
+}
+
+#matchId {
+  font-size: 24px;
+  padding: 25px;
+}
+
+</style>
+</head>
+
+<body>
+<div id="mainContent">
+<p id="helloText">Ingresa el ID del match que queres comprobar si hay riesgo de TO</p>
+	<input type="text" value="" name="matchId" id="matchId" />
+<button id="clickButton" class="buttonStyle">Verificar</button>
+  <h1>Partidas en riesgo de TO</h1>
+  <ul id="authors"></ul>
+</div>
+<script type="text/javascript" src="fetch.js" charset="utf-8"></script>
+<script> 
+var myButton = document.getElementById("clickButton");
+var myText = document.getElementById("helloText");
+
+
+myButton.addEventListener('click', getTO, false)
+
+function doSomething() {
+	myText.textContent = "hello, world!";
+}
+
+function getTO() {
+	var match = document.getElementById("matchId").value;
+	
+	const url = 'https://api.chess.com/pub/match/'+match+'/';
+  fetch(url)
+  .then((resp) => resp.json())
+  .then(function(data) {
+    let teams = data.teams;
+    if(teams.team1.name === "Boca Juniors") {
+      getToTeam(teams.team1);
+    }
+    else {
+      getToTeam(teams.team2);
+    }
+  })
+  .catch(function(error) {
+    console.log(error);
+    alert('Error, reintentar.');
+  });
+}
+
+
+
+function getToTeam(team) {
+  
+	function createNode(element) {
+    return document.createElement(element);
+  }
+
+  function append(parent, el) {
+    return parent.appendChild(el);
+  }
+  
+  function roundToTwo(num) {    
+    return +(Math.round(num + "e+2")  + "e-2");
+  }
+  
+  const ul = document.getElementById('authors');
+  while (ul.firstChild) {
+      ul.removeChild(ul.firstChild);
+  }
+  
+  team.players.map(function(player) {
+      let user = player.username;
+      const board = player.board;
+      fetch(board)
+      .then((resp) => resp.json())
+      .then(function(data) {
+        data.games.map(function(game) {
+          let move = game.turn;
+          if (move != undefined && game[move].includes(user)) {
+            console.log(game)
+            var msec = parseInt(game.move_by) - parseInt(Date.now())/1000;
+            var sec = msec;
+            var hour = roundToTwo(sec/3600);
+            
+            if(hour > 0 && hour < 60) {
+              let li = createNode('li'),
+              span = createNode('span');
+              span.innerHTML = `<a href="https://chess.com/members/${user}">${user}</a> ${hour} horas <a href="${game.url}">Ver partida</a>`;
+              append(li, span);
+              append(ul, li);  
+            }
+          }
+        })
+      })
+      .catch(function(error) {
+        console.log(error);
+        alert('Error, reintentar.');
+      });
+    })
+}
+
+function g2(){
+	 function createNode(element) {
+      return document.createElement(element);
+  }
+
+  function append(parent, el) {
+    return parent.appendChild(el);
+  }
+
+  const ul = document.getElementById('authors');
+  const url = 'https://randomuser.me/api/?results=10';
+  fetch(url)
+  .then((resp) => resp.json())
+  .then(function(data) {
+    let authors = data.results;
+    return authors.map(function(author) {
+      let li = createNode('li'),
+          img = createNode('img'),
+          span = createNode('span');
+      img.src = author.picture.medium;
+      span.innerHTML = `${author.name.first} ${author.name.last}`;
+      append(li, img);
+      append(li, span);
+      append(ul, li);
+    })
+  })
+  .catch(function(error) {
+    console.log(error);
+    alert('Error, reintentar.');
+  });   
+}
+function g3(){
+
+	var user = document.getElementById("matchId").value;
+	
+	function createNode(element) {
+      return document.createElement(element);
+  }
+
+  function append(parent, el) {
+    return parent.appendChild(el);
+  }
+  
+  function roundToTwo(num) {    
+    return +(Math.round(num + "e+2")  + "e-2");
+  }
+
+  const ul = document.getElementById('authors');
+  const url = 'https://api.chess.com/pub/player/'+user+'/games/to-move';
+  fetch(url)
+  .then((resp) => resp.json())
+  .then(function(data) {
+    let authors = data.games;
+    return authors.map(function(author) {
+      var msec = parseInt(author.move_by) - parseInt(Date.now())/1000;
+      var sec = msec;
+      var hour = roundToTwo(sec/3600);
+      
+      if(hour > 0 && hour < 24) {
+        let li = createNode('li'),
+          span = createNode('span');
+        span.innerHTML = `${user} ${hour} horas <a href="${author.url}">Ver partida</a>`;
+        append(li, span);
+        append(ul, li);  
+      }
+    })
+  })
+  .catch(function(error) {
+    console.log(error);
+    alert('Error, reintentar.');
+  });   
+}
+</script>
+
+</body>
+</html>
